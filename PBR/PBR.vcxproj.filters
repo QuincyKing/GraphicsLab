@@ -9,5 +9,32 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{6a1e828f-3770-4558-8d4b-c3c2a3067a49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="basic">
+      <UniqueIdentifier>{3a8516be-5ace-4900-a904-be6ef12a8ca0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.1.pbr.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="1.1.pbr.vs">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\common\basic\program.h">
+      <Filter>basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\common\basic\delegate.h">
+      <Filter>basic</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
