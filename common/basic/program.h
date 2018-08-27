@@ -8,6 +8,7 @@
 #include <basic/delegate.h>
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 class Program
 {
@@ -21,7 +22,6 @@ private:
 		unsigned int posY;
 	}proInfo;
 
-public:
 	std::vector<InitEvent> initEvents;
 	std::vector<RenderEvent> renderEvents;
 	std::vector<DisableEvent> disableEvents;
@@ -30,6 +30,7 @@ public:
 	ScrollEvent scrollEvent = NULL;
 	FramebufferSizeEvent framebufferSizeEvent = NULL;
 	
+public:
 	float deltaTime;
 	float lastFrame;
 
@@ -42,7 +43,7 @@ public:
 		proInfo.posX = _posX;
 		proInfo.posY = _posY;
 
-		keyEvents.push_back(keyEvent);
+		keyEvents.push_back(_keyEvent);
 	}
 
 	int Run()
@@ -83,7 +84,7 @@ public:
 		glGetIntegerv(GL_MINOR_VERSION, &minor);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor);
-		glfwWindowHint(GLFW_SAMPLES, 4);
+		//glfwWindowHint(GLFW_SAMPLES, 4);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
@@ -137,13 +138,127 @@ public:
 		return 0;
 	}
 
-	static void keyEvent(GLFWwindow *window)
+	static void _keyEvent(GLFWwindow *window)
 	{
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 	}
 
-	~Program() {}
+#pragma region 事件的注册与注销
+	void RegisterInit(InitEvent _ie)
+	{
+		initEvents.push_back(_ie);
+	}
+
+	void UnRegisterInit(InitEvent _ie)
+	{
+		auto result = find(initEvents.begin(), initEvents.end(), _ie);
+
+		if(result != initEvents.end())
+			initEvents.erase(result);
+	}
+	
+	void UnRegisterAllInit()
+	{
+		initEvents.clear();
+	}
+
+	void RegisterRender(RenderEvent _re)
+	{
+		renderEvents.push_back(_re);
+	}
+
+	void UnRegisterRender(RenderEvent _re)
+	{
+		auto result = find(renderEvents.begin(), renderEvents.end(), _re);
+
+		if(result != renderEvents.end())
+			renderEvents.erase(result);
+	}
+
+	void UnRegisterAllRender()
+	{
+		renderEvents.clear();
+	}
+
+	void RegisterDisable(DisableEvent _de)
+	{
+		disableEvents.push_back(_de);
+	}
+
+	void UnRegisterDisable(DisableEvent _de)
+	{
+		auto result = find(disableEvents.begin(), disableEvents.end(), _de);
+
+		if (result != disableEvents.end())
+			disableEvents.erase(result);
+	}
+
+	void UnRegisterAllDisable()
+	{
+		disableEvents.clear();
+	}
+
+	void RegisterKey(KeyEvent _ke)
+	{
+		keyEvents.push_back(_ke);
+	}
+
+	void UnRegisterKey(KeyEvent _ke)
+	{
+		auto result = find(keyEvents.begin(), keyEvents.end(), _ke);
+
+		if (result != keyEvents.end())
+			keyEvents.erase(result);
+	}
+
+	void UnRegisterAllKey()
+	{
+		keyEvents.clear();
+	}
+
+	void RegisterMouse(MouseEvent _me)
+	{
+		mouseEvent = _me;
+	}
+
+	void UnRegisterMouse()
+	{
+		mouseEvent = NULL;
+	}
+
+	void RegisterScroll(ScrollEvent _se)
+	{
+		scrollEvent = _se;
+	}
+
+	void UnRegisterScroll()
+	{
+		scrollEvent = NULL;
+	}
+
+	void RegisterFramebuffer(FramebufferSizeEvent _fe)
+	{
+		framebufferSizeEvent = _fe;
+	}
+
+	void UnRegisterFramebuffer()
+	{
+		framebufferSizeEvent = NULL;
+	}
+
+#pragma endregion
+
+	~Program() 
+	{
+		UnRegisterAllInit();
+		UnRegisterAllRender();
+		UnRegisterAllDisable();
+		UnRegisterAllKey();
+		UnRegisterFramebuffer();
+		UnRegisterMouse();
+		UnRegisterScroll();
+	}
 };
 
 #endif

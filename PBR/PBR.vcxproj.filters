@@ -22,19 +22,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="1.1.pbr.fs">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="1.1.pbr.vs">
-      <Filter>shader</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\common\basic\program.h">
       <Filter>basic</Filter>
     </ClInclude>
     <ClInclude Include="..\common\basic\delegate.h">
       <Filter>basic</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\pbr.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\pbr.vs">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

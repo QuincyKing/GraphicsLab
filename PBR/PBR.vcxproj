@@ -14,12 +14,12 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="1.1.pbr.fs" />
-    <None Include="1.1.pbr.vs" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\common\basic\delegate.h" />
     <ClInclude Include="..\common\basic\program.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\pbr.fs" />
+    <None Include="shader\pbr.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{6A17FA6C-87EB-478E-9F67-5E032F9FC173}</ProjectGuid>
