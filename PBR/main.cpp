@@ -42,8 +42,8 @@ int main()
 
 void OnInit()
 {
-	
-	glm::vec3 albedo = glm::vec3(0.5f, 0.0f, 0.0f);
+	glEnable(GL_DEPTH_TEST);
+	glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
 	float ao = 0.5f;
 
 	shader = make_shared<Shader>("./shader/pbr.vs", "./shader/pbr.fs");
@@ -51,8 +51,8 @@ void OnInit()
 	
 	shader->setVec3("albedo", albedo);
 	shader->setFloat("ao", ao);
-	shader->setFloat("metallic", 0.5f);
-	shader->setFloat("roughness", glm::clamp(0.5f, 0.5f, 1.0f));
+	shader->setFloat("metallic", 0.0f);
+	shader->setFloat("roughness", glm::clamp(0.5f, 0.0f, 1.0f));
 
 	glm::mat4 model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -67,13 +67,13 @@ void OnRender()
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 10.0f);
-	glm::vec3 lightColor = glm::vec3(0.0f, 0.0f, 255.0f);
+	glm::vec3 lightColor = glm::vec3(0.0f, 255.0f, 255.0f);
 	shader->use();
 	glm::mat4 view = camera.GetViewMatrix();
 	shader->setMat4("view", view);
 	shader->setVec3("camPos", camera.Position);
-	shader->setVec3("lightPosition", lightPosition + glm::vec3(sin(0.01 * i * 3.1415926), 0, 0));
-
+	shader->setVec3("lightPos", lightPosition + glm::vec3(5*sin(0.005 * i * 3.1415926), 0, 0));
+	shader->setVec3("lightColor", lightColor);
 	i++;
 	RenderSphere();
 }
