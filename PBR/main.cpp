@@ -1,6 +1,7 @@
 #include <basic/camera.h>
 #include <basic/shader.h>
 #include <basic/program.h>
+#include <stb_image.h>
 
 #include <iostream>
 #include <memory>
@@ -14,6 +15,7 @@ void OnKey(GLFWwindow *window);
 void OnRender();
 void OnInit();
 void OnDisable();
+unsigned int LoadTexture(const string path);
 void RenderSphere();
 
 #define SCR_WIDTH 1000
@@ -22,6 +24,7 @@ void RenderSphere();
 Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 std::shared_ptr<Shader> shader;
 std::shared_ptr<Program> pro;
+unsigned int albedo, normal, metallic, roughness, ao;
 
 int main()
 {
@@ -43,38 +46,56 @@ int main()
 void OnInit()
 {
 	glEnable(GL_DEPTH_TEST);
-	glm::vec3 albedo = glm::vec3(1.0f, 0.0f, 0.0f);
-	float ao = 0.5f;
+	glEnable(GL_TEXTURE_2D);
 
 	shader = make_shared<Shader>("./shader/pbr.vs", "./shader/pbr.fs");
 	shader->use();
-	
-	shader->setVec3("albedo", albedo);
-	shader->setFloat("ao", ao);
-	shader->setFloat("metallic", 0.0f);
-	shader->setFloat("roughness", glm::clamp(0.5f, 0.0f, 1.0f));
+
+	shader->setInt("albedoMap", 0);
+	shader->setInt("normalMap", 1);
+	shader->setInt("metallicMap", 2);
+	shader->setInt("roughnessMap", 3);
+	shader->setInt("aoMap", 4);
+
+	albedo = LoadTexture("../resources/textures/pbr/plastic/albedo.png");
+	normal = LoadTexture("../resources/textures/pbr/plastic/normal.png");
+	metallic = LoadTexture("../resources/textures/pbr/plastic/metallic.png");
+	roughness = LoadTexture("../resources/textures/pbr/plastic/roughness.png");
+	ao = LoadTexture("../resources/textures/pbr/plastic/ao.png");
 
 	glm::mat4 model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+	shader->use();
 	shader->setMat4("model", model);
 	shader->setMat4("projection", projection);
 }
 
-int i = 0;
 void OnRender()
 {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 10.0f);
-	glm::vec3 lightColor = glm::vec3(0.0f, 255.0f, 255.0f);
+	glm::vec3 lightColor = glm::vec3(255.0f, 255.0f, 255.0f);
 	shader->use();
 	glm::mat4 view = camera.GetViewMatrix();
 	shader->setMat4("view", view);
 	shader->setVec3("camPos", camera.Position);
-	shader->setVec3("lightPos", lightPosition + glm::vec3(5*sin(0.005 * i * 3.1415926), 0, 0));
+	shader->setVec3("lightPos", lightPosition);
 	shader->setVec3("lightColor", lightColor);
-	i++;
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, albedo);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, metallic);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, roughness);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, ao);
+
 	RenderSphere();
 }
 
@@ -223,4 +244,42 @@ void RenderSphere()
 
 	glBindVertexArray(sphereVAO);
 	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+}
+
+unsigned int LoadTexture(const string _path)
+{
+	const char *path = _path.c_str();
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	return textureID;
 }
