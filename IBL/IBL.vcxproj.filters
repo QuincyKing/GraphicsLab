@@ -25,5 +25,29 @@
     <None Include="shader\pbr.vs">
       <Filter>shader</Filter>
     </None>
+    <None Include="shader\cubemap.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\equirectangular_to_cubemap.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\irradiance_convolution.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\specularld.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\speculardfg.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\speculardfg.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\background.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\background.vs">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
