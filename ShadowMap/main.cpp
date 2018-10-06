@@ -12,19 +12,32 @@ void OnFramebufferSize(GLFWwindow* window, int width, int height);
 void OnMouse(GLFWwindow* window, double xpos, double ypos);
 void OnScroll(GLFWwindow* window, double xoffset, double yoffset);
 void OnKey(GLFWwindow *window);
+void OnShadowMapRender();
 void OnRender();
 void OnInit();
 void OnDisable();
-unsigned int LoadTexture(const string path);
+void RenderPlane();
 void RenderSphere();
+void RenderQuad();
+unsigned int LoadTexture(const string path);
+
 
 #define SCR_WIDTH 1000
 #define SCR_HEIGHT 800
 
 Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 std::shared_ptr<Shader> shader;
+std::shared_ptr<Shader> debug;
+std::shared_ptr<Shader> depthMapShader;
+
 std::shared_ptr<Program> pro;
 unsigned int albedo, normal, metallic, roughness, ao;
+unsigned int depthFBO;
+unsigned int depthMap;
+const unsigned int shadowWidth = 1024, shadowHeight = 1024;
+glm::vec3 lightPosition = glm::vec3(0.0f, 2.0f, 3.0f);
+glm::vec3 lightColor = glm::vec3(255.0f, 255.0f, 255.0f);
+glm::vec3 lightDirection = glm::vec3(0.0f, -1.0f, -1.0f);
 
 int main()
 {
@@ -35,6 +48,7 @@ int main()
 	pro->RegisterScroll(OnScroll);
 	pro->RegisterKey(OnKey);
 	pro->RegisterInit(OnInit);
+	pro->RegisterRender(OnShadowMapRender);
 	pro->RegisterRender(OnRender);
 	pro->RegisterDisable(OnDisable);
 	
@@ -49,6 +63,8 @@ void OnInit()
 	glEnable(GL_TEXTURE_2D);
 
 	shader = make_shared<Shader>("./shader/pbr.vs", "./shader/pbr.fs");
+	debug = make_shared<Shader>("./shader/debug.vs", "./shader/debug.fs");
+	depthMapShader = make_shared<Shader>("./shader/depthMap.vs", "./shader/depthMap.fs");
 	shader->use();
 
 	shader->setInt("albedoMap", 0);
@@ -56,6 +72,7 @@ void OnInit()
 	shader->setInt("metallicMap", 2);
 	shader->setInt("roughnessMap", 3);
 	shader->setInt("aoMap", 4);
+	shader->setInt("shadowMap", 5);
 
 	albedo = LoadTexture("../resources/textures/pbr/plastic/albedo.png");
 	normal = LoadTexture("../resources/textures/pbr/plastic/normal.png");
@@ -65,18 +82,76 @@ void OnInit()
 
 	glm::mat4 model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+	float nearPlane = 1.0f, farPlane = 1000.0f;
+	//glm::mat4 projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
 	shader->use();
 	shader->setMat4("model", model);
 	shader->setMat4("projection", projection);
+
+
+	depthMapShader->use();
+	depthMapShader->setMat4("model", model);
+
+	glGenFramebuffers(1, &depthFBO);
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowWidth, shadowHeight, 
+		0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	GLfloat borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	debug->use();
+	debug->setInt("depthMap", 0);
+}
+
+glm::mat4 lightView;
+void OnShadowMapRender()
+{
+	glm::mat4 lightProjection;
+	
+	glm::mat4 lightSpace;
+	float nearPlane = 1.0f, farPlane = 100.0f;
+	lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+	lightView = glm::lookAt(lightPosition, lightPosition + lightDirection, glm::vec3(0.0f, 1.0f, 0.0f));
+	lightSpace = lightProjection * lightView;
+	depthMapShader->use();
+	depthMapShader->setMat4("lightSpace", lightSpace);
+	shader->use();
+	shader->setMat4("lightSpace", lightSpace);
+
+	depthMapShader->use();
+	glViewport(0, 0, shadowWidth, shadowHeight);
+	glBindFramebuffer(GL_FRAMEBUFFER, depthFBO);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
+	RenderSphere();
+	RenderPlane();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glCullFace(GL_BACK);
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+	//debug->use();
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, depthMap);
+	//RenderQuad();
 }
 
 void OnRender()
 {
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 10.0f);
-	glm::vec3 lightColor = glm::vec3(255.0f, 255.0f, 255.0f);
 	shader->use();
 	glm::mat4 view = camera.GetViewMatrix();
 	shader->setMat4("view", view);
@@ -94,8 +169,11 @@ void OnRender()
 	glBindTexture(GL_TEXTURE_2D, roughness);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, ao);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
 
 	RenderSphere();
+	RenderPlane();
 }
 
 void OnDisable()
@@ -245,6 +323,70 @@ void RenderSphere()
 	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
 }
 
+unsigned int planeVAO = 0;
+unsigned int planeVBO;
+void RenderPlane()
+{
+	if (planeVAO == 0)
+	{
+		float planeVertices[] = {
+
+			5.0f, -1.0f, 5.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			-5.0f, -1.0f, 5.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			-5.0f, -1.0f, -5.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+			5.0f, -1.0f, 5.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+			-5.0f, -1.0f, -5.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+			5.0f, -1.0f, -5.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &planeVAO);
+		glGenBuffers(1, &planeVBO);
+		glBindVertexArray(planeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+		glBindVertexArray(0);
+	}
+	glBindVertexArray(planeVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 6);
+	glBindVertexArray(0);
+}
+
+unsigned int quadVAO = 0;
+unsigned int quadVBO;
+void RenderQuad()
+{
+	if (quadVAO == 0)
+	{
+		float quadVertices[] = {
+			// positions        // texture Coords
+			-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+		// setup plane VAO
+		glGenVertexArrays(1, &quadVAO);
+		glGenBuffers(1, &quadVBO);
+		glBindVertexArray(quadVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 unsigned int LoadTexture(const string _path)
 {
 	const char *path = _path.c_str();
@@ -282,3 +424,4 @@ unsigned int LoadTexture(const string _path)
 
 	return textureID;
 }
+
