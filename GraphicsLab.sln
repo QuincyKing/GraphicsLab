@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IBL", "IBL\IBL.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowMap", "ShadowMap\ShadowMap.vcxproj", "{068A2B05-888E-4EF6-9CB5-64F6D1EBE808}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SSAO", "SSAO\SSAO.vcxproj", "{35FC6CC3-F961-48FD-93AA-F118E123BA6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -27,6 +29,10 @@ Global
 		{068A2B05-888E-4EF6-9CB5-64F6D1EBE808}.Debug|Win32.Build.0 = Debug|Win32
 		{068A2B05-888E-4EF6-9CB5-64F6D1EBE808}.Release|Win32.ActiveCfg = Release|Win32
 		{068A2B05-888E-4EF6-9CB5-64F6D1EBE808}.Release|Win32.Build.0 = Release|Win32
+		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Debug|Win32.Build.0 = Debug|Win32
+		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Release|Win32.ActiveCfg = Release|Win32
+		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
