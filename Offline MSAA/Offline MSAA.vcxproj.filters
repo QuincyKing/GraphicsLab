@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{342f6b1b-32a2-4cb2-9e66-ca2b61279f07}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\aa.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\aa.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\debug.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\debug.fs">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+</Project>

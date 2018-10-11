@@ -69,6 +69,7 @@ int main()
 
 void OnInit()
 {
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_DEPTH_TEST);
 
 	shader = make_shared<Shader>("./shader/ssao.vs", "./shader/pbr.fs");

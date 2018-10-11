@@ -11,6 +11,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShadowMap", "ShadowMap\Shad
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SSAO", "SSAO\SSAO.vcxproj", "{35FC6CC3-F961-48FD-93AA-F118E123BA6C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Offline MSAA", "Offline MSAA\Offline MSAA.vcxproj", "{EAA5522E-9A42-4D9B-B73C-BEA274397CBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -33,6 +35,10 @@ Global
 		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Debug|Win32.Build.0 = Debug|Win32
 		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Release|Win32.ActiveCfg = Release|Win32
 		{35FC6CC3-F961-48FD-93AA-F118E123BA6C}.Release|Win32.Build.0 = Release|Win32
+		{EAA5522E-9A42-4D9B-B73C-BEA274397CBD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EAA5522E-9A42-4D9B-B73C-BEA274397CBD}.Debug|Win32.Build.0 = Debug|Win32
+		{EAA5522E-9A42-4D9B-B73C-BEA274397CBD}.Release|Win32.ActiveCfg = Release|Win32
+		{EAA5522E-9A42-4D9B-B73C-BEA274397CBD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
