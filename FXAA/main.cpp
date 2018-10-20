@@ -28,11 +28,14 @@ std::shared_ptr<Shader> aa;
 std::shared_ptr<Shader> debug;
 std::shared_ptr<Program> pro;
 int samples = 4;
-unsigned int aaFbo, MSAAbuffer, MSAARbo;
+unsigned int aaFbo, FXAAbuffer, FXAARbo;
 unsigned int debugFbo, screenTexture;
+int showEdge = 0, fxaaon = 1;
+float lumaThreshold = 0.5f, mulReduce = 8.0f, minReduce = 128.0f, maxSpan = 8.0f;
+
 int main()
 {
-	pro = make_shared<Program>(SCR_WIDTH, SCR_HEIGHT, 100, 100, "msaa");
+	pro = make_shared<Program>(SCR_WIDTH, SCR_HEIGHT, 100, 100, "fxaa");
 
 	pro->RegisterFramebuffer(OnFramebufferSize);
 	pro->RegisterMouse(OnMouse);
@@ -52,67 +55,57 @@ void OnInit()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	aa = make_shared<Shader>("./shader/aa.vs", "./shader/aa.fs");
+	aa = make_shared<Shader>("./shader/fxaa.vs", "./shader/fxaa.fs");
 	debug = make_shared<Shader>("./shader/debug.vs", "./shader/debug.fs");
 
 	glGenFramebuffers(1, &aaFbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, aaFbo);
 
-	glGenTextures(1, &MSAAbuffer);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, MSAAbuffer);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB, SCR_WIDTH, SCR_HEIGHT, GL_TRUE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, MSAAbuffer, 0);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
+	glGenTextures(1, &FXAAbuffer);
+	glBindTexture(GL_TEXTURE_2D, FXAAbuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FXAAbuffer, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenRenderbuffers(1, &FXAARbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, FXAARbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, FXAARbo);
+
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glGenFramebuffers(1, &debugFbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, debugFbo);
-
-	glGenTextures(1, &screenTexture);
-	glBindTexture(GL_TEXTURE_2D, screenTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenTexture, 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	debug->use();
-	debug->setInt("screenTexture", 0);
+	aa->use();
 }
 
 void  OnRender()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, aaFbo);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
 
-	glm::mat4 model;
-	model = glm::translate(model, glm::vec3(1.0, 1.0, 0.0));
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
-	aa->use();
-	aa->setMat4("model", model);
-	aa->setMat4("view", camera.GetViewMatrix());
-	aa->setMat4("projection", projection);
-
+	glm::mat4 model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+	glm::mat4 per = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1000.0f);
+	debug->use();
+	debug->setMat4("model", model);
+	debug->setMat4("view", camera.GetViewMatrix());
+	debug->setMat4("projection", per);
 	RenderCube();
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, aaFbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, debugFbo);
-	glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
+
+	glBindTexture(GL_TEXTURE_2D, FXAAbuffer);
 	glDisable(GL_DEPTH_TEST);
-	debug->use();
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, screenTexture);
+	aa->use();
 	RenderQuad();
+
+	glEnable(GL_DEPTH_TEST);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
