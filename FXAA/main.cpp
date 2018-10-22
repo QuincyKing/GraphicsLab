@@ -54,10 +54,9 @@ void OnInit()
 {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
-
 	aa = make_shared<Shader>("./shader/fxaa.vs", "./shader/fxaa.fs");
 	debug = make_shared<Shader>("./shader/debug.vs", "./shader/debug.fs");
-
+	glm::mat4()  * glm::mat2x4();
 	glGenFramebuffers(1, &aaFbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, aaFbo);
 
