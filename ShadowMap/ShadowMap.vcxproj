@@ -89,7 +89,23 @@
     <None Include="shader\pbr.vs" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\external\includes\imgui\imgui.cpp" />
+    <ClCompile Include="..\external\includes\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\external\includes\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\external\includes\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\external\includes\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="..\external\includes\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\external\includes\imgui\imconfig.h" />
+    <ClInclude Include="..\external\includes\imgui\imgui.h" />
+    <ClInclude Include="..\external\includes\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\external\includes\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="..\external\includes\imgui\imgui_internal.h" />
+    <ClInclude Include="..\external\includes\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\external\includes\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\external\includes\imgui\imstb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

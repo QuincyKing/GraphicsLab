@@ -1,6 +1,10 @@
+
 #include <basic/camera.h>
+
 #include <basic/shader.h>
+
 #include <basic/program.h>
+
 #include <stb_image.h>
 
 #include <iostream>
@@ -45,6 +49,7 @@ int main()
 
 void OnInit()
 {
+	
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 

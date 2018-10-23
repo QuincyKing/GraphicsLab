@@ -87,7 +87,7 @@ extern "C" {
  #include <X11/Xlib.h>
  #include <X11/extensions/Xrandr.h>
 #else
- #error "No window API selected"
+// #error "No window API selected"
 #endif
 
 #if defined(GLFW_EXPOSE_NATIVE_WGL)
@@ -99,7 +99,7 @@ extern "C" {
 #elif defined(GLFW_EXPOSE_NATIVE_EGL)
  #include <EGL/egl.h>
 #else
- #error "No context API selected"
+// #error "No context API selected"
 #endif
 
 
