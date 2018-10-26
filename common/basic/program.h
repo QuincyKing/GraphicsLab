@@ -33,7 +33,7 @@ private:
 	MouseEvent mouseEvent = NULL;
 	ScrollEvent scrollEvent = NULL;
 	FramebufferSizeEvent framebufferSizeEvent = NULL;
-	
+	CursorEvent cursorEvent = NULL;
 public:
 	int getScreenWidth() { return proInfo.width; }
 	int getScreenHeight() { return  proInfo.height; }
@@ -77,6 +77,7 @@ public:
 		glfwSetCursorPosCallback(window, mouseEvent);
 		glfwSetScrollCallback(window, scrollEvent);
 		glfwSetFramebufferSizeCallback(window, framebufferSizeEvent);
+		glfwSetCursorPosCallback(window, cursorEvent);
 
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -197,6 +198,16 @@ public:
 			initEvents.erase(result);
 	}
 	
+	void RegisterCursor(CursorEvent _ce)
+	{
+		cursorEvent = _ce;
+	}
+
+	void UnRegisterCursor()
+	{
+		cursorEvent = NULL;
+	}
+
 	void UnRegisterAllInit()
 	{
 		initEvents.clear();

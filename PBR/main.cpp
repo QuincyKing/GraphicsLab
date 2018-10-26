@@ -16,6 +16,7 @@ void OnFramebufferSize(GLFWwindow* window, int width, int height);
 void OnMouse(GLFWwindow* window, double xpos, double ypos);
 void OnScroll(GLFWwindow* window, double xoffset, double yoffset);
 void OnKey(GLFWwindow *window);
+void OnCursorPos(GLFWwindow*, double, double);
 void OnRender();
 void OnInit();
 void OnDisable();
@@ -29,6 +30,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
 std::shared_ptr<Shader> shader;
 std::shared_ptr<Program> pro;
 unsigned int albedo, normal, metallic, roughness, ao;
+glm::vec2 curPos(0, 0);
 
 int main()
 {
@@ -41,7 +43,8 @@ int main()
 	pro->RegisterInit(OnInit);
 	pro->RegisterRender(OnRender);
 	pro->RegisterDisable(OnDisable);
-	
+	pro->RegisterCursor(OnCursorPos);
+
 	pro->Run();
 	return 0;
 }
@@ -49,7 +52,6 @@ int main()
 
 void OnInit()
 {
-	
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
@@ -86,7 +88,7 @@ void OnRender()
 	glm::mat4 view = camera.GetViewMatrix();
 	shader->setMat4("view", view);
 	shader->setVec3("camPos", camera.Position);
-	shader->setVec3("lightPos", lightPosition);
+	shader->setVec3("lightPos", lightPosition + glm::vec3(curPos, 0.0));
 	shader->setVec3("lightColor", lightColor);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -153,6 +155,13 @@ void OnFramebufferSize(GLFWwindow* window, int width, int height)
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
+}
+
+void OnCursorPos(GLFWwindow* window, double x, double y)
+{
+	curPos.x = 10 * float((x - SCR_WIDTH / 2) / SCR_WIDTH);
+	curPos.y = 10 * float(0 - (y - SCR_HEIGHT / 2) / SCR_HEIGHT);
+	return;
 }
 
 unsigned int sphereVAO = 0;
