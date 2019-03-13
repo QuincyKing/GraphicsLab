@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="fileutils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\pbr.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\pbr.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="WaterRenderer.h" />
+    <None Include="WaterTile.h" />
+    <None Include="shader\water.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\water.vs">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{9539d3c9-08d2-475a-957e-753f93fa9391}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fileutils.h" />
+    <ClInclude Include="waterframebuffer.h" />
+  </ItemGroup>
+</Project>
