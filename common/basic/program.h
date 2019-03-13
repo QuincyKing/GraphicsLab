@@ -1,9 +1,6 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 
-#include <imgui/imgui.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -33,13 +30,12 @@ private:
 	MouseEvent mouseEvent = NULL;
 	ScrollEvent scrollEvent = NULL;
 	FramebufferSizeEvent framebufferSizeEvent = NULL;
-	CursorEvent cursorEvent = NULL;
 public:
 	int getScreenWidth() { return proInfo.width; }
 	int getScreenHeight() { return  proInfo.height; }
 
-	float deltaTime;
-	float lastFrame;
+	static float deltaTime;
+	static float lastFrame;
 
 public:
 	Program(unsigned int _Width, unsigned int _Height, unsigned int _posX = 0, unsigned int _posY = 0, std::string _title = "")
@@ -72,14 +68,26 @@ public:
 		}
 		glfwSetWindowPos(window, proInfo.posX, proInfo.posY);
 		glfwMakeContextCurrent(window);
+
+		
 		glfwSwapInterval(1); // Enable vsync
 		//注册事件函数
 		glfwSetCursorPosCallback(window, mouseEvent);
 		glfwSetScrollCallback(window, scrollEvent);
 		glfwSetFramebufferSizeCallback(window, framebufferSizeEvent);
-		glfwSetCursorPosCallback(window, cursorEvent);
 
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+
+		glewExperimental = GL_TRUE;
+
+		GLenum glewError = glewInit();
+
+		if (glewError != GLEW_OK)
+		{
+			glfwTerminate();
+			exit(EXIT_FAILURE);
+		}
 
 		//if (!glewLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		//{
@@ -101,13 +109,6 @@ public:
 		const char* glsl_version = "#version 130";
 
 		glewInit();
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init(glsl_version);
-
-		// Setup style
-		ImGui::StyleColorsDark();
 
 		//初始化函数
 		if (!initEvents.empty())
@@ -120,12 +121,9 @@ public:
 		{
 			float currentFrame = glfwGetTime();
 			deltaTime = currentFrame - lastFrame;
-			float lastFrame = currentFrame;
-
+			lastFrame = currentFrame;
+			
 			glfwPollEvents();
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
 
 			//按键事件
 			if (!keyEvents.empty())
@@ -157,8 +155,6 @@ public:
 					fun();
 			}
 			 
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			glfwMakeContextCurrent(window);
 			glfwSwapBuffers(window);
 		}
@@ -169,9 +165,6 @@ public:
 				fun();
 		}
 
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
 		glfwDestroyWindow(window);
 		glfwTerminate();
 
@@ -196,16 +189,6 @@ public:
 
 		if(result != initEvents.end())
 			initEvents.erase(result);
-	}
-	
-	void RegisterCursor(CursorEvent _ce)
-	{
-		cursorEvent = _ce;
-	}
-
-	void UnRegisterCursor()
-	{
-		cursorEvent = NULL;
 	}
 
 	void UnRegisterAllInit()
@@ -329,5 +312,8 @@ public:
 		UnRegisterScroll();
 	}
 };
+
+float Program::deltaTime = 0.0f;
+float Program::lastFrame = 0.0f;
 
 #endif

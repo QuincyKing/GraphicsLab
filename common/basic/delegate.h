@@ -12,6 +12,5 @@ using MouseEvent = void (*)(GLFWwindow *, double, double);
 using ScrollEvent = void(*)(GLFWwindow *, double, double);
 using FramebufferSizeEvent = void (*)(GLFWwindow *, int, int);
 using GUIEvent = void (*)(void);
-using CursorEvent = void (*)(GLFWwindow*, double, double);
 
 #endif
