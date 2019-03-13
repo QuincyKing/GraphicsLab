@@ -6,4 +6,4 @@ API：OpenGL
 ## 案例
 ### Water
 
-![water](.\effect\water.jpg)
+![water](effect\water.jpg)
