@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -11,25 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\external\includes\imgui\imgui.cpp" />
-    <ClCompile Include="..\external\includes\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\external\includes\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\external\includes\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="..\external\includes\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="..\external\includes\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\common\basic\delegate.h" />
     <ClInclude Include="..\common\basic\program.h" />
-    <ClInclude Include="..\external\includes\imgui\imconfig.h" />
-    <ClInclude Include="..\external\includes\imgui\imgui.h" />
-    <ClInclude Include="..\external\includes\imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="..\external\includes\imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="..\external\includes\imgui\imgui_internal.h" />
-    <ClInclude Include="..\external\includes\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\external\includes\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\external\includes\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\pbr.fs" />
@@ -39,18 +25,19 @@
     <ProjectGuid>{6A17FA6C-87EB-478E-9F67-5E032F9FC173}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>PBR</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -83,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp.lib;glew32.lib;glfw3.lib;SOIL.lib;opengl32.lib;STB_IMAGE.lib;GLAD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;glew32.lib;glfw3.lib;SOIL.lib;opengl32.lib;STB_IMAGE.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
