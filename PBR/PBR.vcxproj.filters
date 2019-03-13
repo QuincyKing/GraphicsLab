@@ -11,31 +11,10 @@
     <Filter Include="basic">
       <UniqueIdentifier>{3a8516be-5ace-4900-a904-be6ef12a8ca0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="imgui">
-      <UniqueIdentifier>{d5a53398-ea93-403b-8f44-6f9a454164d2}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui_demo.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui_draw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui_impl_glfw.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui_impl_opengl3.cpp">
-      <Filter>imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\external\includes\imgui\imgui_widgets.cpp">
-      <Filter>imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,30 +23,6 @@
     </ClInclude>
     <ClInclude Include="..\common\basic\delegate.h">
       <Filter>basic</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imconfig.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imgui.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imgui_impl_glfw.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imgui_impl_opengl3.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imgui_internal.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imstb_rectpack.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imstb_textedit.h">
-      <Filter>imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\external\includes\imgui\imstb_truetype.h">
-      <Filter>imgui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
