@@ -10,30 +10,38 @@
 #include <iostream>
 #include <memory>
 
+#include "water.h"
+#include "watermasterrender.h"
+
 using namespace std;
 
 void OnFramebufferSize(GLFWwindow* window, int width, int height);
 void OnMouse(GLFWwindow* window, double xpos, double ypos);
 void OnScroll(GLFWwindow* window, double xoffset, double yoffset);
 void OnKey(GLFWwindow *window);
+void OnCursorPos(GLFWwindow*, double, double);
 void OnRender();
 void OnInit();
 void OnDisable();
 unsigned int LoadTexture(const string path);
 void RenderSphere();
+void RenderCube();
 
 #define SCR_WIDTH 1000
 #define SCR_HEIGHT 800
 
-Camera camera(glm::vec3(0.0f, 0.0f, 10.0f));
+Camera camera(glm::vec3(0.0f, 2.0f, 10.0f));
 std::shared_ptr<Shader> shader;
+std::shared_ptr<Shader> s;
 std::shared_ptr<Program> pro;
 unsigned int albedo, normal, metallic, roughness, ao;
 glm::vec2 curPos(0, 0);
+Water water;
+WaterMasterRenderer wmr;
 
 int main()
 {
-	pro = make_shared<Program>(SCR_WIDTH, SCR_HEIGHT, 100, 100, "pbr");
+	pro = make_shared<Program>(SCR_WIDTH, SCR_HEIGHT, 100, 100, "lowpolywater");
 
 	pro->RegisterFramebuffer(OnFramebufferSize);
 	pro->RegisterMouse(OnMouse);
@@ -42,11 +50,10 @@ int main()
 	pro->RegisterInit(OnInit);
 	pro->RegisterRender(OnRender);
 	pro->RegisterDisable(OnDisable);
-
+	
 	pro->Run();
 	return 0;
 }
-
 
 void OnInit()
 {
@@ -69,25 +76,45 @@ void OnInit()
 	ao = LoadTexture("../resources/textures/pbr/plastic/ao.png");
 
 	glm::mat4 model = glm::mat4();
-	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+	model = glm::translate(model, glm::vec3(0.0f, 2.0f, 0.0f));
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 	shader->use();
 	shader->setMat4("model", model);
 	shader->setMat4("projection", projection);
+
+	water = Water(-4.0f, -4.0f, 0.0f, 10);
+	wmr = WaterMasterRenderer(&camera, water);
+}
+
+void Reflect()
+{
+	shader->use();
+	shader->setVec4("plane", glm::vec4(0.0f, 1.0f, 0.0f, -water.height));
+	shader->setMat4("view", camera.GetViewMatrix());
+	RenderSphere();
+}
+
+void ReFraction()
+{
+	shader->use();
+	shader->setVec4("plane", glm::vec4(0.0f, -1.0f, 0.0f, water.height));
+	shader->setMat4("view", camera.GetViewMatrix());
+	RenderSphere();
 }
 
 void OnRender()
 {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 	glm::vec3 lightPosition = glm::vec3(0.0f, 0.0f, 10.0f);
 	glm::vec3 lightColor = glm::vec3(255.0f, 255.0f, 255.0f);
 	shader->use();
-	glm::mat4 view = camera.GetViewMatrix();
-	shader->setMat4("view", view);
 	shader->setVec3("camPos", camera.Position);
 	shader->setVec3("lightPos", lightPosition + glm::vec3(curPos, 0.0));
 	shader->setVec3("lightColor", lightColor);
+
+	wmr.renderWater(ReFraction, Reflect);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, albedo);
@@ -99,13 +126,13 @@ void OnRender()
 	glBindTexture(GL_TEXTURE_2D, roughness);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, ao);
-
+	shader->use();
+	shader->setMat4("view", camera.GetViewMatrix());
 	RenderSphere();
 }
 
 void OnDisable()
 {
-
 }
 
 float lastX = 800.0f / 2.0;
@@ -114,20 +141,8 @@ bool firstMouse = true;
 
 void OnMouse(GLFWwindow* window, double xpos, double ypos)
 {
-	if (firstMouse)
-	{
-		lastX = xpos;
-		lastY = ypos;
-		firstMouse = false;
-	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-	lastX = xpos;
-	lastY = ypos;
-
-	camera.ProcessMouseMovement(xoffset, yoffset);
+	curPos.x = 10 * float((xpos - SCR_WIDTH / 2) / SCR_WIDTH);
+	curPos.y = 10 * float(0 - (ypos - SCR_HEIGHT / 2) / SCR_HEIGHT);
 }
 
 void OnScroll(GLFWwindow* window, double xoffset, double yoffset)
@@ -146,6 +161,10 @@ void OnKey(GLFWwindow *window)
 		camera.ProcessKeyboard(LEFT, 0.01f);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, 0.01f);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		camera.ProcessMouseMovement(0.0, 5.0);
+	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		camera.ProcessMouseMovement(0.0, -5.0);
 }
 
 void OnFramebufferSize(GLFWwindow* window, int width, int height)
@@ -153,13 +172,6 @@ void OnFramebufferSize(GLFWwindow* window, int width, int height)
 	// make sure the viewport matches the new window dimensions; note that width and 
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
-}
-
-void OnCursorPos(GLFWwindow* window, double x, double y)
-{
-	curPos.x = 10 * float((x - SCR_WIDTH / 2) / SCR_WIDTH);
-	curPos.y = 10 * float(0 - (y - SCR_HEIGHT / 2) / SCR_HEIGHT);
-	return;
 }
 
 unsigned int sphereVAO = 0;
@@ -255,6 +267,69 @@ void RenderSphere()
 
 	glBindVertexArray(sphereVAO);
 	glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+}
+
+unsigned int cubeVAO = 0, cubeVBO = 0;
+void RenderCube()
+{
+	if (cubeVAO == 0 || cubeVBO == 0)
+	{
+		float cubeVertices[] = {
+			// positions       
+			-0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, -0.5f,
+			0.5f, 0.5f, -0.5f,
+			0.5f, 0.5f, -0.5f,
+			-0.5f, 0.5f, -0.5f,
+			-0.5f, -0.5f, -0.5f,
+
+			-0.5f, -0.5f, 0.5f,
+			0.5f, -0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, 0.5f,
+			-0.5f, -0.5f, 0.5f,
+
+			-0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, -0.5f,
+			-0.5f, -0.5f, -0.5f,
+			-0.5f, -0.5f, -0.5f,
+			-0.5f, -0.5f, 0.5f,
+			-0.5f, 0.5f, 0.5f,
+
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, -0.5f,
+			0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+
+			-0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, -0.5f,
+			0.5f, -0.5f, 0.5f,
+			0.5f, -0.5f, 0.5f,
+			-0.5f, -0.5f, 0.5f,
+			-0.5f, -0.5f, -0.5f,
+
+			-0.5f, 0.5f, -0.5f,
+			0.5f, 0.5f, -0.5f,
+			0.5f, 0.5f, 0.5f,
+			0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, 0.5f,
+			-0.5f, 0.5f, -0.5f
+		};
+		glGenVertexArrays(1, &cubeVAO);
+		glGenBuffers(1, &cubeVBO);
+		glBindVertexArray(cubeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	}
+
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 }
 
 unsigned int LoadTexture(const string _path)

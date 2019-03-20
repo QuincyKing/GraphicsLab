@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="shader">
+      <UniqueIdentifier>{5591b0ed-9892-40f2-b3e7-b66f21f4bbfa}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\pbr.fs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\pbr.vs">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\waterFragment.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\waterVertex.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\waterHdFragment.glsl">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\waterHdVertex.glsl">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fileutils.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fileutils.h" />
+    <ClInclude Include="waterframebuffer.h" />
+    <ClInclude Include="water.h" />
+    <ClInclude Include="watergenerator.h" />
+    <ClInclude Include="waterrender.h" />
+    <ClInclude Include="waterhdrender.h" />
+    <ClInclude Include="watermasterrender.h" />
+  </ItemGroup>
+</Project>
